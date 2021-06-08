@@ -1,11 +1,15 @@
-
+import java.util.*;
 /**
+ * Assignment No. 1
+ * 
+ * Due: November 11, 2015 (Wednesday) at 11:55PM
  * 
  * Complete the stubbed methods in the "Maze.java" and
  * "MazeNode.java" source files. The areas where you need to insert your
  * codes are commented with three successive question marks (???). Read the
  * inline comments to get further information regarding the code elements. You
- * can define auxiliary methods to your liking in this class. 
+ * can define auxiliary methods to your liking in this class. This homework must
+ * comply with the homework policy specified in the "Assignments" page.
  * 
  * 
  * To compile and/or run the sources in this homework, include the provided .JAR
@@ -31,7 +35,7 @@ public class Maze {
 	protected MazeUI _mazeUI;
 
 	/**
-	 * This method implements the searching algorithm of the state space graph of the
+	 * This method implements the A-star search of the state space graph of the
 	 * maze. The search starts from the starting state of the maze whose node is
 	 * returned by the getStartNode() method of the _mazeUI object. A node of the
 	 * state space graph is represented by an instance of the MazeNode
@@ -66,12 +70,89 @@ public class Maze {
 	 *           if the search thread has been externally interrupted
 	 */
 	public boolean doSearch() throws InterruptedException {
+		// the collection containing the list of open nodes
 
 		// ??? - modify this method
+		
+		//Mark all nodes unvisited. Create a set of all the unvisited nodes called the unvisited set.
 
+
+
+		PriorityQueue<MazeNode> queue;
+		queue = new PriorityQueue<>();
+
+		int size = _mazeUI.getMazeSize();
+
+        MazeNode node = _mazeUI.getStartNode();
+        _mazeUI.closedListAdd(node);
+        _mazeUI.updateGUIState();
+        queue.add(node);
+
+        int nodeStateX = _mazeUI.getStartNode().getStateX();
+		int nodeStateY = _mazeUI.getStartNode().getStateY();
+
+        while(!queue.isEmpty()){
+
+
+			node = getPriorityNode(queue);
+			_mazeUI.closedListAdd(node);		
+			queue.remove(node);	
+			_mazeUI.updateGUIState();
+
+			if( _mazeUI.isGoalNode( node ) ) {		
+				return true;
+			}
+
+
+            nodeStateX = node.getStateX();
+            nodeStateY = node.getStateY();
+
+			float gValue = node.getGValue()+1;
+            
+            //essay
+			MazeNode down = new MazeNode(nodeStateX,nodeStateY+1,node,gValue,node.computeHValue(nodeStateX,nodeStateY+1,_mazeUI.getGoalStateX(),_mazeUI.getGoalStateY()));
+            MazeNode right = new MazeNode(nodeStateX+1,nodeStateY,node,gValue,node.computeHValue(nodeStateX+1,nodeStateY,_mazeUI.getGoalStateX(),_mazeUI.getGoalStateY()));
+            MazeNode up = new MazeNode(nodeStateX,nodeStateY-1,node,gValue,node.computeHValue(nodeStateX,nodeStateY-1,_mazeUI.getGoalStateX(),_mazeUI.getGoalStateY()));
+            MazeNode left = new MazeNode(nodeStateX-1,nodeStateY,node,gValue,node.computeHValue(nodeStateX-1,nodeStateY,_mazeUI.getGoalStateX(),_mazeUI.getGoalStateY()));
+
+            if(!_mazeUI.hasBarricade(nodeStateX,nodeStateY,nodeStateX,nodeStateY+1) && (nodeStateX>=0 && nodeStateX<size) && (nodeStateY+1>=0 && nodeStateY+1<size) && !_mazeUI.closedListContains(down)){
+                queue.offer(down);
+            }
+            if(!_mazeUI.hasBarricade(nodeStateX,nodeStateY,nodeStateX+1,nodeStateY) && (nodeStateX+1>=0 && nodeStateX+1<size) && (nodeStateY>=0 && nodeStateY<size) && !_mazeUI.closedListContains(right)){
+                queue.offer(right);
+            }
+            if(!_mazeUI.hasBarricade(nodeStateX,nodeStateY,nodeStateX,nodeStateY-1) && (nodeStateX>=0 && nodeStateX<size) && (nodeStateY-1>=0 && nodeStateY-1<size) && !_mazeUI.closedListContains(up)){
+
+                queue.offer(up);
+            }
+            if(!_mazeUI.hasBarricade(nodeStateX,nodeStateY,nodeStateX-1,nodeStateY) && (nodeStateX-1>=0 && nodeStateX-1<size) && (nodeStateY>=0 && nodeStateY<size) && !_mazeUI.closedListContains(left)){
+
+                queue.offer(left);
+            }
+        }
 		return false;
 	}
 
+	public static MazeNode getPriorityNode(PriorityQueue<MazeNode> queue){
+
+		PriorityQueue<Float> distance = new PriorityQueue<Float>();
+		int i;	
+
+		Object[] o = queue.toArray();
+		for(i=0; i<queue.size(); i++) {
+			distance.add(((MazeNode) o[i]).getGValue());
+		}
+
+		float distanceValue = distance.peek();
+
+		for(i=0; i<queue.size(); i++) {
+			if(distanceValue == ((MazeNode) o[i]).getGValue()) 
+				break;
+		}
+
+		return (MazeNode) o[i];
+
+	}	
 
 
 	/**

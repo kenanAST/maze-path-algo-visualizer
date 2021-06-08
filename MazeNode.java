@@ -40,6 +40,7 @@ public class MazeNode implements Comparable<MazeNode> {
 	 */
 	private final MazeNode _parent;
 
+
 	/**
 	 * This class constructor takes five parameters. The first parameter is the
 	 * x-coordinate part of the state that will be contained in this node, the
@@ -164,6 +165,8 @@ public class MazeNode implements Comparable<MazeNode> {
 	public float getFValue() {
 		return _fValue;
 	}
+
+
 
 	/**
 	 * This static method computes the h-value of the given state from the given
